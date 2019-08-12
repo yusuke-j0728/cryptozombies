@@ -4,9 +4,26 @@ import "./zombiefeeding.sol";
 
 contract ZombieHelper is ZombieFeeding {
     
+    uint levelUpFee = 0.001 ether;
+    
     modifier abovelevel(uint _level, uint _zombieId) {
         require(zombies[_zombieId].level >= _level);
         _;
+    }
+    
+    function withdrawal() external onlyOwner {
+        // Here is how to cast address to address payable /// https://ethereum.stackexchange.com/questions/65693/how-to-cast-address-to-address-payable-in-solidity-0-5-0
+        address payable _owner = address(uint160(owner())); 
+        _owner.transfer(address(this).balance);
+    }
+    
+    function setLevelUpFee(uint _fee) external onlyOwner {
+        levelUpFee = _fee;
+    }
+    
+    function levelUp(uint _zombieId) external payable {
+        require(msg.value == levelUpFee);
+        zombies[_zombieId].level++;
     }
     
     function changeName(uint _zombieId, string calldata  _newName) external abovelevel(2, _zombieId) {
